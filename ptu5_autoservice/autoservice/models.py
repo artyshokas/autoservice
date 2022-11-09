@@ -23,6 +23,7 @@ class Car(models.Model):
     number = models.CharField('number', max_length=10, help_text='Enter car reg. number')
     car_name = models.ForeignKey(Car_model, on_delete=models.CASCADE, null=True, blank=True)
     vin = models.CharField('VIN', max_length=17, help_text='Enter VIN')
+    owner = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.car_name}, {self.number}, {self.vin}"
@@ -31,10 +32,14 @@ class Car(models.Model):
 
 class Service(models.Model):
     name = models.CharField('Service name', max_length=100, help_text='Enter service name')
+    car = models.ManyToManyField(Car_model)
 
     def __str__(self) -> str:
         return f"{self.name}"
 
+    def display_cars(self):
+        return ', '.join(car.make for car in self.car.all())
+    display_cars.short_description= 'Car(s)'
 
 class Price(models.Model):
     service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True)
@@ -45,10 +50,13 @@ class Price(models.Model):
 
 
 
+
+
 class Order(models.Model):
     date = models.DateField('Order date', null=True, blank=True)
     car = models.ForeignKey(Car, on_delete=models.CASCADE, null=True)
-    client_id = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True)
+    # client_id = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True)
+    total = models.ForeignKey(Price, on_delete=models.DO_NOTHING, null=True)
 
     def __str__(self) -> str:
         return f"{self.car}"
